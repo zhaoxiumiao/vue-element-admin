@@ -1,5 +1,6 @@
 <template>
   <component :is="type" v-bind="linkProps(to)">
+    <!-- component动态改变 -->
     <slot />
   </component>
 </template>

@@ -17,7 +17,6 @@
     </el-scrollbar>
   </div>
 </template>
-
 <script>
 import { mapGetters } from 'vuex'
 import Logo from './Logo'
@@ -35,7 +34,7 @@ export default {
       const route = this.$route
       const { meta, path } = route
       // if set path, the sidebar will highlight the path you set
-      if (meta.activeMenu) {
+      if (meta.activeMenu) { // 可以通过配置meta.activeMenu
         return meta.activeMenu
       }
       return path

@@ -6,12 +6,14 @@
           <item :icon="onlyOneChild.meta.icon||(item.meta&&item.meta.icon)" :title="onlyOneChild.meta.title" />
         </el-menu-item>
       </app-link>
+
     </template>
 
     <el-submenu v-else ref="subMenu" :index="resolvePath(item.path)" popper-append-to-body>
       <template slot="title">
         <item v-if="item.meta" :icon="item.meta && item.meta.icon" :title="item.meta.title" />
       </template>
+      <!-- 关键点这里是组件自身调用自身 -->
       <sidebar-item
         v-for="child in item.children"
         :key="child.path"
@@ -74,6 +76,7 @@ export default {
       }
 
       // Show parent if there are no child router to display
+      // 如果
       if (showingChildren.length === 0) {
         this.onlyOneChild = { ... parent, path: '', noShowingChildren: true }
         return true

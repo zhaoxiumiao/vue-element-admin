@@ -18,7 +18,7 @@ function hasPermission(roles, route) {
  * @param routes asyncRoutes
  * @param roles
  */
-export function filterAsyncRoutes(routes, roles) {
+export function filterAsyncRoutes(routes, roles) { // 通过递归找出所有符合条件的路由
   const res = []
 
   routes.forEach(route => {

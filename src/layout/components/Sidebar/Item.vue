@@ -12,7 +12,7 @@ export default {
       default: ''
     }
   },
-  render(h, context) {
+  render(h, context) { // 这里用的jsx语法
     const { icon, title } = context.props
     const vnodes = []
 
@@ -25,7 +25,7 @@ export default {
     }
 
     if (title) {
-      vnodes.push(<span slot='title'>{(title)}</span>)
+      vnodes.push(<span slot='title'>{(title)}</span>) // 这里的slot是一个定义一个具名插槽
     }
     return vnodes
   }
