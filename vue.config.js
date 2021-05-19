@@ -35,8 +35,8 @@ module.exports = {
     overlay: {
       warnings: false,
       errors: true
-    },
-    before: require('./mock/mock-server.js')
+    }
+    // before: require('./mock/mock-server.js') //接口
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that

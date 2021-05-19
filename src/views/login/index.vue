@@ -21,7 +21,7 @@
         />
       </el-form-item>
 
-      <el-tooltip v-model="capsTooltip" content="Caps lock is On" placement="right" manual>
+      <el-tooltip v-model="capsTooltip" content="开启大写" placement="right" manual>
         <el-form-item prop="password">
           <span class="svg-container">
             <svg-icon icon-class="password" />
@@ -74,7 +74,7 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
+        username: '', // admin
         password: '111111'
       },
       loginRules: {
@@ -102,6 +102,7 @@ export default {
     }
   },
   mounted() {
+    // 如果为空进行自动聚焦
     if (this.loginForm.username === '') {
       this.$refs.username.focus()
     } else if (this.loginForm.password === '') {
@@ -120,6 +121,7 @@ export default {
         this.passwordType = 'password'
       }
       this.$nextTick(() => {
+        // 点击显示密码眼睛时进行焦点获取
         this.$refs.password.focus()
       })
     },
@@ -134,7 +136,7 @@ export default {
               this.loading = false
             })
             .catch(() => {
-              this.loading = false
+              this.loading = false // 加载效果
             })
         } else {
           console.log('error submit!!')
@@ -143,7 +145,7 @@ export default {
       })
     },
     getOtherQuery(query) {
-      return Object.keys(query).reduce((acc, cur) => {
+      return Object.keys(query).reduce((acc, cur) => { // acc={}, cur是循环便利的当前项
         if (cur !== 'redirect') {
           acc[cur] = query[cur]
         }
