@@ -122,7 +122,7 @@
           <el-row>
             <el-col :span="24">
               <el-form-item :label-width="labelWidth" label="目录: ">
-                <div v-if="postForm.contents && postForm.contents.length > 0" class="contents-wrapper">
+                <div v-if="contentsTree && contentsTree.length > 0" class="contents-wrapper">
                   <el-tree :data="contentsTree" @node-click="onContentClick" />
                 </div>
                 <span v-else>无</span>
@@ -140,7 +140,7 @@ import Stick from '../../../components/Sticky'
 import Warning from './Warning'
 import EbookUpload from '@/components/EbookUpload'
 import MDInput from '../../../components/MDinput'
-import { createBook } from '../../../api/book'
+import { createBook, getBook, updateBook } from '../../../api/book'
 
 // const defaultForm = {
 //   title: '',
@@ -199,7 +199,18 @@ export default {
       }
     }
   },
+  created() {
+    if (this.isEdit) {
+      const fileName = this.$route.params.fileName
+      this.getBookData(fileName)
+    }
+  },
   methods: {
+    getBookData(fileName) {
+      getBook(fileName).then(response => {
+        this.setDate(response.data)
+      })
+    },
     onContentClick(data) {
       if (data.text) {
         window.open(data.text)
@@ -244,6 +255,7 @@ export default {
         filePath,
         unzipPath
       }
+
       this.contentsTree = contentsTree
     },
     onUploadSuccess(data) {
@@ -255,6 +267,16 @@ export default {
       console.log('onUploadRemove')
     },
     submitForm() { // 提交事件
+      const onSuccess = (response) => {
+        const { msg } = response
+        this.$notify({ // 这里也是一个提示操作
+          title: '操作成功',
+          message: msg,
+          type: 'success',
+          duration: 2000
+        })
+        this.loading = false
+      }
       if (!this.loading) {
         this.loading = true
         this.$refs.postForm.validate((valid, fields) => { // 进行表单验证
@@ -264,21 +286,18 @@ export default {
             // console.log(book);
             if (!this.isEdit) { // 判断是新增还是更改
               createBook(book).then(response => {
-                const { msg } = response
-                this.$notify({ // 这里也是一个提示操作
-                  title: '操作成功',
-                  message: msg,
-                  type: 'success',
-                  duration: 2000
-                })
-                this.loading = false
+                onSuccess(response)
                 this.setDefault()
               }).catch(() => {
                 this.loading = false
                 this.setDefault()
               })
             } else {
-              // updateBook(book)
+              updateBook(book).then(response => {
+                onSuccess(response)
+              }).catch(() => {
+                this.loading = false
+              })
             }
           } else {
             const message = fields[Object.keys(fields)[0]][0].message
