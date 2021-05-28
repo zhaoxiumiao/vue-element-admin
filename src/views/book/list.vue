@@ -71,6 +71,7 @@
       fit
       highlight-current-row
       style="width: 100%"
+      :default-sort="defaultSort"
       @sort-change="sortChange"
     >
       <el-table-column
@@ -86,13 +87,104 @@
         align="center"
       >
         <!-- slot-scope -->
-        <template v-slot="{row: {title}}">
-          <span>{{ title }}</span>
+        <template v-slot="{row: {titleWrapper}}">
+          <span v-html="titleWrapper" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="作者"
+        width="150"
+        align="center"
+      >
+        <!-- slot-scope -->
+        <template v-slot="{row: {authorWrapper}}">
+          <span v-html="authorWrapper" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="出版社"
+        prop="publisher"
+        width="150"
+        align="center"
+      />
+      <el-table-column
+        label="分类"
+        prop="categoryText"
+        width="100"
+        align="center"
+      />
+      <el-table-column
+        label="语言"
+        prop="language"
+        align="center"
+      />
+      <el-table-column
+        v-if="showCover"
+        label="封面"
+        width="150"
+        align="center"
+      >
+        <template v-slot="scope">
+          <a :href="scope.row.cover" target="_blank">
+            <img :src="scope.row.cover" style="width:120px; height:180px;">
+          </a>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="文件名" prop="fileName" width="100" align="center" />
+      <el-table-column label="文件路径" prop="filePath" width="100" align="center">
+        <template v-slot="{row: {filePath}}">
+          <span>{{ filePath | valueFilter }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="封面路径" prop="coverPath" width="100" align="center">
+        <template v-slot="{row: {coverPath}}">
+          <span>{{ coverPath | valueFilter }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="解压路径" prop="unzipPath" width="100" align="center">
+        <template v-slot="{row: {unzipPath}}">
+          <span>{{ unzipPath | valueFilter }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="上传人" prop="createUser" width="100" align="center">
+        <template v-slot="{row: {createUser}}">
+          <span>{{ createUser | valueFilter }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="上传时间" prop="createDt" width="100" align="center">
+        <template v-slot="{row: {createDt}}">
+          <span>{{ createDt | timeFilter }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column
+        label="操作"
+        width="120"
+        align="center"
+        fixed="right"
+      >
+        <template v-slot="{row}">
+          <el-button type="text" icon="el-icon-edit" @click="handleUpdate(row)" />
+          <el-button
+            type="text"
+            icon="el-icon-delete"
+            style="color:#f56c6c"
+            @click="handleDelete(row)"
+          />
         </template>
       </el-table-column>
     </el-table>
     <Pagination
-      :total="0"
+      v-show="total > 0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.pageSize"
+      @pagination="refresh"
     />
   </div>
 </template>
@@ -100,7 +192,8 @@
 <script>
 import Pagination from '../../components/Pagination/index'
 import waves from '../../directive/waves/index'
-import { getCategory, listBook } from '../../api/book'
+import { getCategory, listBook, deleteBook } from '../../api/book'
+import { parseTime } from '../../utils/index'
 export default {
   directives: {
     waves
@@ -108,30 +201,99 @@ export default {
   components: {
     Pagination
   },
+  filters: {
+    valueFilter(value) {
+      return value || '无'
+    },
+    timeFilter(time) {
+      return time ? parseTime(time, '{y}-{m}-{d} {h}:{i}') : '无'
+    }
+  },
   data() {
     return {
-      listQuery: {
-
-      },
+      listQuery: {},
       showCover: false,
       categoryList: [],
       listLoading: true,
       tableKey: 0,
-      list: []
+      list: [],
+      total: 0,
+      defaultSort: {}
     }
+  },
+  created() {
+    this.parseQuery()
   },
   mounted() {
     this.getList()
     this.getCategoryList()
   },
+  beforeRouteUpdate(to, from, next) {
+    console.log(to, from)
+    const newQuery = Object.assign({}, to.query)
+    const oldQuery = Object.assign({}, from.query)
+    if (JSON.stringify(newQuery) !== JSON.stringify(oldQuery)) {
+      this.getList()
+    }
+    next()
+  },
   methods: {
-    sortChange() {
-      console.log('sortChange')
+    parseQuery() {
+      const query = Object.assign({}, this.$route.query)
+      let sort = '+id'
+      const listQuery = {
+        page: 1,
+        pageSize: 20,
+        sort
+      }
+      if (query) {
+        query.page && (query.page = +query.page)
+        query.pageSize && (query.pageSize = +query.pageSize)
+        query.sort && (sort = query.sort)
+      }
+      const sortSymbol = sort[0]
+      const sortColumn = sort.slice(1, sort.length)
+      console.log(sortSymbol, sortColumn)
+      this.defaultSort = {
+        prop: sortColumn,
+        order: sortSymbol === '+' ? 'ascending' : 'descending'
+      }
+      this.listQuery = { ...listQuery, ...query }
+    },
+    sortChange(data) {
+      console.log('sortChange', data)
+      const { prop, order } = data
+      this.sortBy(prop, order)
+    },
+    sortBy(prop, order) {
+      if (order === 'ascending') {
+        this.listQuery.sort = `+${prop}`
+      } else {
+        this.listQuery.sort = `-${prop}`
+      }
+      this.handleFilter()
+    },
+    wrapperKeywork(k, v) {
+      function highlight(value) {
+        return `<sapn style="color:#1890ff">${value}</span>`
+      }
+      if (!this.listQuery[k]) {
+        return v
+      } else {
+        return v.replace(new RegExp(this.listQuery[k], 'ig'), v => highlight(v))
+      }
     },
     getList() {
       this.listLoading = true
       listBook(this.listQuery).then(response => {
-
+        const { list, count } = response.data
+        this.list = list
+        this.total = count
+        this.listLoading = false
+        this.list.forEach(book => {
+          book.titleWrapper = this.wrapperKeywork('title', book.title)
+          book.authorWrapper = this.wrapperKeywork('author', book.author)
+        })
       })
     },
     getCategoryList() {
@@ -140,12 +302,42 @@ export default {
         console.log(this.categoryList)
       })
     },
+    refresh() {
+      this.$router.push({
+        path: '/book/list',
+        query: this.listQuery
+      })
+    },
     handleFilter() {
       console.log('handleFilter', this.listQuery)
-      this.getList()
+      this.listQuery.page = 1
+      this.refresh()
+      // this.getList()
     },
     handleCreate() {
       this.$router.push('/book/create')
+    },
+
+    handleUpdate(row) {
+      console.log('handleUpdate', row)
+      this.$router.push(`/book/edit/${row.fileName}`)
+    },
+    handleDelete(row) {
+      this.$confirm('此操作将永久删除电子书, 是否继续? ', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteBook(row.fileName).then(response => {
+          this.$notify({
+            title: '成功',
+            message: response.msg || '删除成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.handleFilter()
+        })
+      })
     },
     changeShowCover(value) {
       console.log(this.showCover)
