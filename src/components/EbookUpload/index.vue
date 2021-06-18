@@ -55,7 +55,7 @@ export default {
   },
   methods: {
     beforeUpload(file) { // 上传之前调用
-      console.log(file)
+      // console.log(file)
       this.$emit('beforeUpload', file)
     },
     onSuccess(response, file) { // 上传成功

@@ -229,7 +229,7 @@ export default {
     this.getCategoryList()
   },
   beforeRouteUpdate(to, from, next) {
-    console.log(to, from)
+    // console.log(to, from)
     const newQuery = Object.assign({}, to.query)
     const oldQuery = Object.assign({}, from.query)
     if (JSON.stringify(newQuery) !== JSON.stringify(oldQuery)) {
@@ -253,7 +253,7 @@ export default {
       }
       const sortSymbol = sort[0]
       const sortColumn = sort.slice(1, sort.length)
-      console.log(sortSymbol, sortColumn)
+      // console.log(sortSymbol, sortColumn)
       this.defaultSort = {
         prop: sortColumn,
         order: sortSymbol === '+' ? 'ascending' : 'descending'
@@ -261,7 +261,7 @@ export default {
       this.listQuery = { ...listQuery, ...query }
     },
     sortChange(data) {
-      console.log('sortChange', data)
+      // console.log('sortChange', data)
       const { prop, order } = data
       this.sortBy(prop, order)
     },
@@ -299,7 +299,7 @@ export default {
     getCategoryList() {
       getCategory().then(response => {
         this.categoryList = response.data
-        console.log(this.categoryList)
+        // console.log(this.categoryList)
       })
     },
     refresh() {
@@ -309,7 +309,7 @@ export default {
       })
     },
     handleFilter() {
-      console.log('handleFilter', this.listQuery)
+      // console.log('handleFilter', this.listQuery)
       this.listQuery.page = 1
       this.refresh()
       // this.getList()
@@ -319,7 +319,7 @@ export default {
     },
 
     handleUpdate(row) {
-      console.log('handleUpdate', row)
+      // console.log('handleUpdate', row)
       this.$router.push(`/book/edit/${row.fileName}`)
     },
     handleDelete(row) {
@@ -340,7 +340,7 @@ export default {
       })
     },
     changeShowCover(value) {
-      console.log(this.showCover)
+      // console.log(this.showCover)
       this.$data.showCover = value
     }
   }

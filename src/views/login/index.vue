@@ -127,7 +127,7 @@ export default {
     },
     handleLogin() {
       this.$refs.loginForm.validate(valid => { // 通过loginRules 进行校验
-        console.log(valid)
+        // console.log(valid)
         if (valid) {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm)

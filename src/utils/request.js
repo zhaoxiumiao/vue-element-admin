@@ -4,7 +4,7 @@ import store from '@/store'
 import { getToken } from '@/utils/auth'
 
 // create an axios instance;
-console.log(process.env.VUE_APP_BASE_API)
+// console.log(process.env.VUE_APP_BASE_API)
 
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
@@ -27,7 +27,7 @@ service.interceptors.request.use(
   },
   error => {
     // do something with request error
-    console.log(error) // for debug
+    // console.log(error) // for debug
     return Promise.reject(error)
   }
 )
@@ -53,7 +53,7 @@ service.interceptors.response.use(
         type: 'error',
         duration: 5 * 1000
       })
-      console.log(res.code)
+      // console.log(res.code)
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
       if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
         // to re-login
@@ -75,7 +75,7 @@ service.interceptors.response.use(
   },
   error => {
     const { msg } = error.response.data
-    console.log(error.response.status)
+    // console.log(error.response.status)
     Message({
       message: msg || '请求失败',
       type: 'error',

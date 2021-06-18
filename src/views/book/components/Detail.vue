@@ -259,12 +259,12 @@ export default {
       this.contentsTree = contentsTree
     },
     onUploadSuccess(data) {
-      console.log('onUploadSuccess', data)
+      // console.log('onUploadSuccess', data)
       this.setDate(data)
     },
     onUploadRemove() {
       this.setDefault()
-      console.log('onUploadRemove')
+      // console.log('onUploadRemove')
     },
     submitForm() { // 提交事件
       const onSuccess = (response) => {
@@ -307,7 +307,7 @@ export default {
       }
     },
     showGuide() {
-      console.log('showGuide')
+      // console.log('showGuide')
     }
   }
 
